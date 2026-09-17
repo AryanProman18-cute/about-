@@ -5,6 +5,25 @@ It looks long, but it is really just: extract, create repo, push, click one sett
 
 ---
 
+## The no-terminal way: upload the zip + run the workflow
+
+If dragging 79 files around is not your thing, there is a shortcut. The
+project includes a workflow that unzips `about.zip` inside GitHub for you:
+
+1. Upload `about.zip` to the repo (Add file -> Upload files).
+2. If it is not there yet, create the file `.github/workflows/unzip.yml`
+   (Add file -> Create new file) and paste in the contents of the same file
+   from this project.
+3. Go to the **Actions** tab, pick **Unzip and deploy site**, click
+   **Run workflow**, choose the `main` branch, run it.
+4. The workflow extracts the zip, commits all files, deletes the zip, builds
+   the site and publishes it. One click, done.
+
+Any time you get a fresh `about.zip` (site updates), just upload it over the
+old one and run the workflow again.
+
+---
+
 ## What you need
 
 - A free GitHub account (github.com)

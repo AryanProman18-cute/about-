@@ -12,6 +12,8 @@ interface ContactItem {
   href: string;
 }
 
+const RESUME_URL = 'https://suyashvjain.web.app/Suyash_Jain_Resume.pdf';
+
 const CONTACT_ITEMS: ContactItem[] = [
   {
     icon: Mail,
@@ -130,6 +132,15 @@ export default function ContactSection() {
 
       <footer className="mt-16 flex flex-col items-center justify-between gap-2 border-t border-[#D7E2EA]/10 pt-6 text-center text-[10px] font-light uppercase tracking-widest text-[#FFFFFF]/50 sm:mt-20 sm:flex-row sm:text-left sm:text-xs md:pt-8">
         <span>&copy; 2026 Suyash Vasal Jain</span>
+        <a
+          href={RESUME_URL}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => externalLinkFallback(RESUME_URL, 'resume', toast)}
+          className="underline decoration-[#D7E2EA]/30 underline-offset-4 transition-colors duration-200 hover:text-[#FFFFFF] hover:decoration-[#D7E2EA]/70"
+        >
+          Resume
+        </a>
         <span>Indore, Madhya Pradesh, India</span>
       </footer>
     </section>

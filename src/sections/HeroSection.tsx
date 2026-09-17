@@ -83,12 +83,12 @@ export default function HeroSection() {
           the cursor's soft trail. */}
       <div className="pointer-events-none absolute inset-x-0 top-[8vh] z-[1] flex justify-center">
         <FadeIn delay={0.6} y={30}>
-          <div ref={lilyWrapRef} className="relative h-[104.88vh]">
+          <div ref={lilyWrapRef} className="relative h-auto w-full lg:h-[104.88vh] lg:w-auto">
             <img
               src="/assets/lily-front.png"
               alt="Pixel-art pink and violet lily"
               draggable={false}
-              className="h-full w-auto select-none"
+              className="h-auto w-full select-none lg:h-full lg:w-auto"
             />
             <img
               ref={lilyRevealRef}
