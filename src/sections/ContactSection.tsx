@@ -1,4 +1,4 @@
-import { Github, Globe, Linkedin, Mail, MapPin, Phone, type LucideIcon } from 'lucide-react';
+import { FileText, Github, Globe, Linkedin, Mail, MapPin, Phone, type LucideIcon } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import ContactButton from '../components/ContactButton';
 import FadeIn from '../components/FadeIn';
@@ -130,15 +130,16 @@ export default function ContactSection() {
         </FadeIn>
       </div>
 
-      <footer className="mt-16 flex flex-col items-center justify-between gap-2 border-t border-[#D7E2EA]/10 pt-6 text-center text-[10px] font-light uppercase tracking-widest text-[#FFFFFF]/50 sm:mt-20 sm:flex-row sm:text-left sm:text-xs md:pt-8">
+      <footer className="mt-16 flex flex-col items-center justify-between gap-3 border-t border-[#D7E2EA]/10 pt-6 text-center text-xs font-normal uppercase tracking-wider text-[#FFFFFF]/80 sm:mt-20 sm:flex-row sm:text-left sm:text-sm md:pt-8">
         <span>&copy; 2026 Suyash Vasal Jain</span>
         <a
           href={RESUME_URL}
           target="_blank"
           rel="noreferrer"
           onClick={() => externalLinkFallback(RESUME_URL, 'resume', toast)}
-          className="underline decoration-[#D7E2EA]/30 underline-offset-4 transition-colors duration-200 hover:text-[#FFFFFF] hover:decoration-[#D7E2EA]/70"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#D7E2EA]/40 px-4 py-2 text-[11px] font-medium uppercase tracking-widest text-[#FFFFFF] transition-colors duration-200 hover:border-[#D7E2EA]/90 hover:bg-[#FFFFFF]/10 sm:text-xs"
         >
+          <FileText size={14} strokeWidth={1.8} />
           Resume
         </a>
         <span>Indore, Madhya Pradesh, India</span>

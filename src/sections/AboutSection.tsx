@@ -32,7 +32,7 @@ export default function AboutSection() {
         x={-80}
         y={0}
         duration={0.9}
-        className="absolute left-[1%] top-[4%] w-[120px] sm:left-[2%] sm:w-[160px] md:left-[4%] md:w-[210px]"
+        className="hidden lg:block absolute left-[1%] top-[4%] w-[120px] sm:left-[2%] sm:w-[160px] md:left-[4%] md:w-[210px] lg:left-[1%] lg:w-[150px] min-[1440px]:left-[4%] min-[1440px]:w-[210px]"
       >
         <img src={DECOR_IMAGES.moon} alt="3D moon icon" className="h-auto w-full" draggable={false} />
       </FadeIn>
@@ -41,7 +41,7 @@ export default function AboutSection() {
         x={-80}
         y={0}
         duration={0.9}
-        className="absolute bottom-[8%] left-[3%] w-[100px] sm:left-[6%] sm:w-[140px] md:left-[10%] md:w-[180px]"
+        className="hidden lg:block absolute bottom-[8%] left-[3%] w-[100px] sm:left-[6%] sm:w-[140px] md:left-[10%] md:w-[180px] lg:left-[2%] lg:w-[120px] min-[1440px]:left-[10%] min-[1440px]:w-[180px]"
       >
         <img src={DECOR_IMAGES.p59} alt="3D abstract object" className="h-auto w-full" draggable={false} />
       </FadeIn>
@@ -50,7 +50,7 @@ export default function AboutSection() {
         x={80}
         y={0}
         duration={0.9}
-        className="absolute right-[1%] top-[4%] w-[120px] sm:right-[2%] sm:w-[160px] md:right-[4%] md:w-[210px]"
+        className="hidden lg:block absolute right-[1%] top-[4%] w-[120px] sm:right-[2%] sm:w-[160px] md:right-[4%] md:w-[210px] lg:right-[1%] lg:w-[150px] min-[1440px]:right-[4%] min-[1440px]:w-[210px]"
       >
         <img src={DECOR_IMAGES.lego} alt="3D lego icon" className="h-auto w-full" draggable={false} />
       </FadeIn>
@@ -59,7 +59,7 @@ export default function AboutSection() {
         x={80}
         y={0}
         duration={0.9}
-        className="absolute bottom-[8%] right-[3%] w-[130px] sm:right-[6%] sm:w-[170px] md:right-[10%] md:w-[220px]"
+        className="hidden lg:block absolute bottom-[8%] right-[3%] w-[130px] sm:right-[6%] sm:w-[170px] md:right-[10%] md:w-[220px] lg:right-[2%] lg:w-[140px] min-[1440px]:right-[10%] min-[1440px]:w-[220px]"
       >
         <img src={DECOR_IMAGES.group} alt="3D shapes group" className="h-auto w-full" draggable={false} />
       </FadeIn>

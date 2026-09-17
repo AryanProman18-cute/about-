@@ -1,4 +1,4 @@
-##Portfolio
+# Suyash Vasal Jain | Portfolio
 
 A dark, motion-heavy personal portfolio for **Suyash Vasal Jain**, full stack
 developer from Indore, India. Built with **React 18**, **TypeScript**,

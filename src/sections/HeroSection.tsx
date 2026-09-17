@@ -81,7 +81,7 @@ export default function HeroSection() {
           hero (artfully overlapping the giant heading). The pink/violet
           bloom is always visible; the warm coral bloom appears only inside
           the cursor's soft trail. */}
-      <div className="pointer-events-none absolute inset-x-0 top-[8vh] z-[1] flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-[1] flex -translate-y-1/2 justify-center lg:top-[8vh] lg:translate-y-0">
         <FadeIn delay={0.6} y={30}>
           <div ref={lilyWrapRef} className="relative h-auto w-full lg:h-[104.88vh] lg:w-auto">
             <img
