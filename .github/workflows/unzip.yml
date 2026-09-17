@@ -60,6 +60,25 @@ jobs:
         env:
           GITHUB_PAGES: true
 
+      - name: Enable Pages if needed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CODE=$(curl -s -o /tmp/pages.json -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages" \
+            -d '{"build_type":"workflow"}')
+          if [ "$CODE" = "201" ]; then
+            echo "Pages enabled automatically."
+          elif [ "$CODE" = "409" ]; then
+            echo "Pages already enabled."
+          else
+            echo "Auto-enable returned HTTP $CODE:"
+            cat /tmp/pages.json || true
+            echo "If the next step fails: Settings -> Pages -> Source: GitHub Actions (repo must be public)."
+          fi
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
