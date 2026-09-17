@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Black canvas on <html>; body/#root stay transparent so the fixed
+   purple-maroon backdrop layer (negative z-index) shows through. */
+html {
+  background: #0c0c0c;
+}
+
+body,
+#root {
+  background: transparent;
+}
+
+body {
+  font-family: 'Kanit', sans-serif;
+}
+
+/* Headline treatment, pure white, per the new theme */
+.hero-heading {
+  color: #ffffff;
+}
