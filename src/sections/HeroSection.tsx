@@ -1,5 +1,6 @@
 import { useRef, type MouseEvent } from 'react';
 import FadeIn from '../components/FadeIn';
+import ContactButton from '../components/ContactButton';
 import { useMorphTrail } from '../components/MorphTrail';
 
 const NAV_LINKS = [
@@ -124,8 +125,8 @@ export default function HeroSection() {
         </FadeIn>
       </div>
 
-      {/* Bottom bar */}
-      <div className="mt-auto flex items-end px-6 pb-7 sm:pb-8 md:px-10 md:pb-10">
+      {/* Bottom bar: tagline left, primary call to action right */}
+      <div className="mt-auto flex items-end justify-between gap-4 px-6 pb-7 sm:pb-8 md:px-10 md:pb-10">
         <FadeIn delay={0.35} y={20}>
           <p
             className="max-w-[160px] font-light uppercase leading-snug tracking-wide text-[#FFFFFF] sm:max-w-[220px] md:max-w-[260px]"
@@ -133,6 +134,9 @@ export default function HeroSection() {
           >
             a full stack developer driven by crafting striking and unforgettable projects
           </p>
+        </FadeIn>
+        <FadeIn delay={0.5} y={20} className="shrink-0">
+          <ContactButton label="Get In Touch" href="#contact" />
         </FadeIn>
       </div>
 

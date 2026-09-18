@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { useToast } from './Toast';
 import { copyToClipboard } from '../utils/clipboard';
 
@@ -8,7 +9,7 @@ interface ContactButtonProps {
 }
 
 const BASE_CLASS =
-  'cursor-pointer rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base';
+  'cursor-pointer rounded-full px-8 py-3 text-xs font-medium uppercase tracking-widest text-white transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] sm:px-10 sm:py-3.5 sm:text-sm md:px-12 md:py-4 md:text-base';
 
 const BUTTON_STYLE: React.CSSProperties = {
   // New theme: deep violet-navy → sky blue → lily hot pink → reveal-lily coral
@@ -26,11 +27,18 @@ const BUTTON_STYLE: React.CSSProperties = {
 export default function ContactButton({ label = 'Contact Me', className = '', href }: ContactButtonProps) {
   const toast = useToast();
 
-  const handleClick = () => {
+  const handleClick = (e?: MouseEvent) => {
     if (href?.startsWith('mailto:')) {
       const value = href.replace('mailto:', '');
       copyToClipboard(value);
       toast(`email copied: ${value}`);
+      return;
+    }
+    // In-page anchors scroll smoothly, same as the nav links, which also
+    // works inside sandboxed previews where hash navigation is blocked.
+    if (href?.startsWith('#')) {
+      e?.preventDefault();
+      document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 

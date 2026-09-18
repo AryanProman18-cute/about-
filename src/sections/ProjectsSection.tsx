@@ -1,7 +1,10 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import FadeIn from '../components/FadeIn';
 import LiveProjectButton from '../components/LiveProjectButton';
+import { useToast } from '../components/Toast';
+import { externalLinkFallback } from '../utils/clipboard';
 
 interface Project {
   number: string;
@@ -90,6 +93,7 @@ function ProjectCard({ project, index, totalCards, progress }: ProjectCardProps)
   // Earlier cards shrink a little more than later ones.
   const targetScale = 1 - (totalCards - 1 - index) * 0.03;
   const scale = useTransform(progress, [index / totalCards, 1], [1, targetScale]);
+  const toast = useToast();
 
   return (
     <div className="sticky top-24 h-[85vh] md:top-32">
@@ -124,36 +128,54 @@ function ProjectCard({ project, index, totalCards, progress }: ProjectCardProps)
           <LiveProjectButton label="View Project" href={project.link} className="shrink-0" />
         </div>
 
-        {/* Image grid: 2 stacked tiles (40%) + 1 tall tile (60%) */}
-        <div className="flex gap-3 sm:gap-4">
-          <div className="flex w-[40%] flex-col gap-3 sm:gap-4">
-            <img
-              src={project.img1}
-              alt={`${project.name} preview 1`}
-              decoding="async"
-              draggable={false}
-              className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-              style={{ height: 'clamp(110px, 13vw, 185px)' }}
-            />
-            <img
-              src={project.img2}
-              alt={`${project.name} preview 2`}
-              decoding="async"
-              draggable={false}
-              className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-              style={{ height: 'clamp(135px, 17vw, 260px)' }}
-            />
+        {/* Image grid: 2 stacked tiles (40%) + 1 tall tile (60%). The whole
+            preview area is a live link for the project, with a clear
+            Explore callout on hover; the View Project pill stays as the
+            always-visible and touch-friendly action. */}
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => project.link && externalLinkFallback(project.link, 'project', toast)}
+          className="group relative block cursor-pointer"
+        >
+          <div className="flex gap-3 sm:gap-4">
+            <div className="flex w-[40%] flex-col gap-3 sm:gap-4">
+              <img
+                src={project.img1}
+                alt={`${project.name} preview 1`}
+                decoding="async"
+                draggable={false}
+                className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
+                style={{ height: 'clamp(110px, 13vw, 185px)' }}
+              />
+              <img
+                src={project.img2}
+                alt={`${project.name} preview 2`}
+                decoding="async"
+                draggable={false}
+                className="w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
+                style={{ height: 'clamp(135px, 17vw, 260px)' }}
+              />
+            </div>
+            <div className="relative w-[60%]">
+              <img
+                src={project.img3}
+                alt={`${project.name} preview 3`}
+                decoding="async"
+                draggable={false}
+                className="absolute inset-0 h-full w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
+              />
+            </div>
           </div>
-          <div className="relative w-[60%]">
-            <img
-              src={project.img3}
-              alt={`${project.name} preview 3`}
-              decoding="async"
-              draggable={false}
-              className="absolute inset-0 h-full w-full rounded-[40px] object-cover sm:rounded-[50px] md:rounded-[60px]"
-            />
+          {/* Hover callout over the preview area */}
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[40px] bg-[#0C0C0C]/45 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:rounded-[50px] md:rounded-[60px]">
+            <span className="flex translate-y-2 scale-95 items-center gap-2.5 rounded-full border-2 border-[#D7E2EA] bg-[#0C0C0C]/85 px-6 py-3 text-xs font-medium uppercase tracking-widest text-[#FFFFFF] transition-transform duration-300 group-hover:translate-y-0 group-hover:scale-100 sm:text-sm">
+              Explore Project
+              <ArrowRight size={15} strokeWidth={2} />
+            </span>
           </div>
-        </div>
+        </a>
 
         {/* One-line summary */}
         <p className="mt-4 line-clamp-2 text-sm font-light leading-relaxed text-[#FFFFFF]/70 sm:mt-5 sm:text-base">

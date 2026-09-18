@@ -3,7 +3,7 @@ import ContactButton from '../components/ContactButton';
 import FadeIn from '../components/FadeIn';
 
 const ABOUT_TEXT =
-  "i\u2019m suyash vasal jain, a full stack developer and computer science student at symbiosis university, indore. i build production-ready systems (rag pipelines, scalable backends, and clean responsive frontends) and run a freelance practice building production sites for local businesses. i care about performance, structure, and products that actually deliver value. let\u2019s build something incredible together!";
+  "I\u2019m Suyash Vasal Jain, a full stack developer and computer science student at Symbiosis University, Indore. I build production-ready systems (RAG pipelines, scalable backends, and clean responsive frontends) and run a freelance practice building production sites for local businesses. I care about performance, structure, and products that actually deliver value. Let\u2019s build something incredible together!";
 
 const HIGHLIGHTS = [
   'B.Tech CS & IT · Symbiosis University · CGPA 8.94',
