@@ -14,15 +14,20 @@ export default function HeroSection() {
   const lilyWrapRef = useRef<HTMLDivElement>(null);
   const lilyFrontRef = useRef<HTMLImageElement>(null);
   const lilyRevealRef = useRef<HTMLImageElement>(null);
+  const lilyFrontCanvasRef = useRef<HTMLCanvasElement>(null);
+  const lilyRevealCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Morphing blob trail: the cursor wipes organic holes through the front
-  // bloom and paints the warm bloom inside the same shapes. Touch devices
-  // never fire mousemove, so they simply keep the front bloom.
+  // bloom and paints the warm bloom inside the same shapes, composited
+  // directly on canvas layers over the flower. Touch devices never fire
+  // mousemove, so they simply keep the front bloom.
   useMorphTrail({
     stage: stageRef,
     flower: lilyWrapRef,
     front: lilyFrontRef,
     reveal: lilyRevealRef,
+    frontCanvas: lilyFrontCanvasRef,
+    revealCanvas: lilyRevealCanvasRef,
   });
 
   // Programmatic smooth scroll, works everywhere, including sandboxed
@@ -63,13 +68,26 @@ export default function HeroSection() {
               draggable={false}
               className="h-auto w-full select-none lg:h-full lg:w-auto"
             />
+            {/* Draw source for the warm bloom, never displayed directly. */}
             <img
               ref={lilyRevealRef}
               src="/assets/lily-reveal.png"
               alt=""
               draggable={false}
               className="absolute inset-0 h-full w-full select-none object-cover"
-              style={{ opacity: 0 }}
+              style={{ visibility: 'hidden' }}
+            />
+            {/* Visible trail layers: front lily with holes punched out, and
+                the warm lily painted only inside the trail shapes. */}
+            <canvas
+              ref={lilyFrontCanvasRef}
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full"
+            />
+            <canvas
+              ref={lilyRevealCanvasRef}
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full"
             />
           </div>
         </FadeIn>

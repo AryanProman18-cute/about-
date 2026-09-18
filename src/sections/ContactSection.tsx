@@ -137,6 +137,7 @@ export default function ContactSection() {
           target="_blank"
           rel="noreferrer"
           onClick={() => externalLinkFallback(RESUME_URL, 'resume', toast)}
+          data-magnetic
           className="inline-flex items-center gap-1.5 rounded-full border border-[#D7E2EA]/40 px-4 py-2 text-[11px] font-medium uppercase tracking-widest text-[#FFFFFF] transition-colors duration-200 hover:border-[#D7E2EA]/90 hover:bg-[#FFFFFF]/10 sm:text-xs"
         >
           <FileText size={14} strokeWidth={1.8} />

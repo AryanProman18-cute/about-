@@ -36,13 +36,13 @@ export default function ContactButton({ label = 'Contact Me', className = '', hr
 
   if (href) {
     return (
-      <a href={href} onClick={handleClick} className={`${BASE_CLASS} ${className}`} style={BUTTON_STYLE}>
+      <a href={href} onClick={handleClick} data-magnetic className={`${BASE_CLASS} ${className}`} style={BUTTON_STYLE}>
         {label}
       </a>
     );
   }
   return (
-    <button type="button" onClick={handleClick} className={`${BASE_CLASS} ${className}`} style={BUTTON_STYLE}>
+    <button type="button" onClick={handleClick} data-magnetic className={`${BASE_CLASS} ${className}`} style={BUTTON_STYLE}>
       {label}
     </button>
   );

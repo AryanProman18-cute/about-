@@ -4,17 +4,19 @@ import { useEffect, type RefObject } from 'react';
  * Mouse morph-reveal trail for the hero lily.
  *
  * Not a CSS circle spotlight. An organic, morphing blob trail follows the
- * cursor across the flower. The same trail drives two complementary masks:
+ * cursor across the flower, and the same trail drives two complementary
+ * canvas layers that sit exactly over the lily:
  *
- *   invert=false  FRONT lily: canvas filled white, blobs punched out with
- *                 destination-out, so the trail leaves holes in the front
- *                 bloom (heading and backdrop show through).
- *   invert=true   REVEAL lily: clear canvas, white blobs, so the warm bloom
- *                 is painted only inside the trail.
+ *   front layer   draws the front lily, then stamps the shared blob canvas
+ *                 with destination-out, so the trail punches holes in the
+ *                 front bloom (heading and backdrop show through).
+ *   reveal layer  draws the warm reveal lily, then stamps the same blobs
+ *                 with destination-in, so the warm bloom is painted only
+ *                 inside the trail.
  *
- * Every active frame the canvas bitmaps are pushed into the img masks via
- * mask-image: url(canvas.toDataURL()), size 100% 100%, no repeat. The
- * wordmark still shows through the transparent petals of both images.
+ * Everything is composited directly on canvas: no CSS mask-image and no
+ * data URLs, so the wipe renders identically in every browser and never
+ * blinks out. The wordmark still shows through the transparent petals.
  */
 
 export const TRAIL_MAX_POINTS = 60;
@@ -37,68 +39,7 @@ type TrailPoint = { x: number; y: number; r: number; alpha: number; seed: number
 // Tiny diagnostics handle so the trail can be profiled from devtools.
 declare global {
   interface Window {
-    __morphTrailStats?: { scale: number; workEma: number; frames: number };
-  }
-}
-
-/** One masked layer: an offscreen canvas whose bitmap becomes the mask of a
- *  cover-fit img. invert picks punch-holes (front) versus paint-blobs (reveal). */
-class MorphTrailLayer {
-  readonly canvas: HTMLCanvasElement;
-  private readonly ctx: CanvasRenderingContext2D;
-  private readonly invert: boolean;
-  private cssW = 0;
-  private cssH = 0;
-  private scale = 1;
-
-  constructor(invert: boolean) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('canvas 2d context unavailable');
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.invert = invert;
-  }
-
-  /** Size the backing bitmap to the flower box, optionally at a reduced
-   *  resolution. Masks are smooth organic shapes, so a half resolution
-   *  bitmap stretches invisibly while encoding twice as fast. */
-  resize(cssW: number, cssH: number, scale: number) {
-    this.cssW = cssW;
-    this.cssH = cssH;
-    this.scale = scale;
-    const w = Math.max(2, Math.round(cssW * scale));
-    const h = Math.max(2, Math.round(cssH * scale));
-    if (this.canvas.width !== w || this.canvas.height !== h) {
-      this.canvas.width = w;
-      this.canvas.height = h;
-    }
-  }
-
-  redraw(points: TrailPoint[], head: TrailPoint | null, time: number) {
-    const { ctx } = this;
-    ctx.setTransform(this.scale, 0, 0, this.scale, 0, 0);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
-    if (this.invert) {
-      // Reveal layer: transparent base, white blobs are the only visible area.
-      ctx.clearRect(0, 0, this.cssW, this.cssH);
-    } else {
-      // Front layer: opaque white base, blobs are punched out as holes.
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, this.cssW, this.cssH);
-      ctx.globalCompositeOperation = 'destination-out';
-    }
-    for (const p of points) {
-      ctx.globalAlpha = p.alpha;
-      drawMorphBlob(ctx, p.x, p.y, p.r, time, p.seed);
-    }
-    if (head) {
-      ctx.globalAlpha = head.alpha;
-      drawMorphBlob(ctx, head.x, head.y, head.r, time, head.seed);
-    }
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
+    __morphTrailStats?: { factor: number; workEma: number; frames: number };
   }
 }
 
@@ -139,38 +80,102 @@ function drawMorphBlob(
   ctx.fill();
 }
 
+/** One visible canvas layer over the flower. The source image is drawn at
+ *  the flower's CSS size, then the shared blob canvas is stamped in with a
+ *  composite mode: destination-out cuts holes, destination-in keeps only
+ *  the blob shape. Returns false while the image is still decoding, so the
+ *  caller can keep the original img visible for that time. */
+class CompositeLayer {
+  private readonly ctx: CanvasRenderingContext2D;
+  cssW = 0;
+  cssH = 0;
+
+  constructor(private readonly el: HTMLCanvasElement) {
+    const ctx = el.getContext('2d');
+    if (!ctx) throw new Error('canvas 2d context unavailable');
+    this.ctx = ctx;
+  }
+
+  resize(cssW: number, cssH: number, factor: number) {
+    this.cssW = cssW;
+    this.cssH = cssH;
+    const w = Math.max(2, Math.round(cssW * factor));
+    const h = Math.max(2, Math.round(cssH * factor));
+    if (this.el.width !== w || this.el.height !== h) {
+      this.el.width = w;
+      this.el.height = h;
+    }
+    // Setting the bitmap size resets all context state, so re-apply the
+    // transform and the high quality resampling for the lily art.
+    this.ctx.setTransform(w / cssW, 0, 0, h / cssH, 0, 0);
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
+  }
+
+  draw(img: HTMLImageElement, blob: HTMLCanvasElement, mode: GlobalCompositeOperation): boolean {
+    if (this.cssW < 2 || !(img.complete && img.naturalWidth > 0)) return false;
+    const { ctx } = this;
+    ctx.clearRect(0, 0, this.cssW, this.cssH);
+    ctx.drawImage(img, 0, 0, this.cssW, this.cssH);
+    ctx.globalCompositeOperation = mode;
+    ctx.drawImage(blob, 0, 0, this.cssW, this.cssH);
+    ctx.globalCompositeOperation = 'source-over';
+    return true;
+  }
+
+  clear() {
+    if (this.cssW >= 2) this.ctx.clearRect(0, 0, this.cssW, this.cssH);
+  }
+}
+
 interface MorphTrailRefs {
   /** Stage: the element that owns hover (mouse events fire anywhere on it). */
   stage: RefObject<HTMLElement | null>;
   /** Flower: the element the canvases are sized to and coords map into. */
   flower: RefObject<HTMLElement | null>;
-  /** Front lily img: holes get punched where the trail passes. */
+  /** Front lily img: hidden while the front canvas paints it with holes. */
   front: RefObject<HTMLImageElement | null>;
-  /** Reveal lily img: painted only where the trail passes. */
+  /** Reveal lily img: never displayed, only used as the drawImage source. */
   reveal: RefObject<HTMLImageElement | null>;
+  /** Visible canvas over the flower painting the front lily with holes. */
+  frontCanvas: RefObject<HTMLCanvasElement | null>;
+  /** Visible canvas over the flower painting the reveal lily in blobs. */
+  revealCanvas: RefObject<HTMLCanvasElement | null>;
 }
 
-export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) {
+export function useMorphTrail({ stage, flower, front, reveal, frontCanvas, revealCanvas }: MorphTrailRefs) {
   useEffect(() => {
     const stageEl = stage.current;
     const flowerEl = flower.current;
     const frontEl = front.current;
     const revealEl = reveal.current;
-    if (!stageEl || !flowerEl || !frontEl || !revealEl) return;
+    const frontCanvasEl = frontCanvas.current;
+    const revealCanvasEl = revealCanvas.current;
+    if (!stageEl || !flowerEl || !frontEl || !revealEl || !frontCanvasEl || !revealCanvasEl) return;
     // Static front bloom only when the visitor prefers reduced motion.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const frontLayer = new MorphTrailLayer(false);
-    const revealLayer = new MorphTrailLayer(true);
+    let frontLayer: CompositeLayer;
+    let revealLayer: CompositeLayer;
+    const blob = document.createElement('canvas');
+    const blobCtx = blob.getContext('2d');
+    try {
+      frontLayer = new CompositeLayer(frontCanvasEl);
+      revealLayer = new CompositeLayer(revealCanvasEl);
+    } catch {
+      return; // no 2d context: keep the plain front lily, always visible
+    }
+    if (!blobCtx) return;
+
     let points: TrailPoint[] = [];
     let headRadius = 0;
     let hovering = false;
     let time = 0;
     let raf = 0;
     let running = false;
-    // Bitmap resolution, halved at most twice if the per frame work (canvas
-    // encode) keeps running long, so slower machines still get a fluid trail.
-    let scale = 1;
+    // Canvas resolution factor: the device pixel ratio, capped, and stepped
+    // down if the per frame compositing work ever runs long.
+    let factor = Math.min(window.devicePixelRatio || 1, 2);
     let workEma = 0;
     let slowStreak = 0;
     let frames = 0;
@@ -181,11 +186,18 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
     const lastSample = { x: -9999, y: -9999 };
     const HEAD_SEED = 37.2;
 
-    const syncCanvasSize = () => {
+    const resizeAll = () => {
       const rect = flowerEl.getBoundingClientRect();
       if (rect.width < 2 || rect.height < 2) return;
-      frontLayer.resize(rect.width, rect.height, scale);
-      revealLayer.resize(rect.width, rect.height, scale);
+      frontLayer.resize(rect.width, rect.height, factor);
+      revealLayer.resize(rect.width, rect.height, factor);
+      const w = Math.max(2, Math.round(rect.width * factor));
+      const h = Math.max(2, Math.round(rect.height * factor));
+      if (blob.width !== w || blob.height !== h) {
+        blob.width = w;
+        blob.height = h;
+      }
+      blobCtx.setTransform(w / rect.width, 0, 0, h / rect.height, 0, 0);
     };
 
     const toFlower = (clientX: number, clientY: number) => {
@@ -194,22 +206,6 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
         x: ((clientX - rect.left) / Math.max(1, rect.width)) * rect.width,
         y: ((clientY - rect.top) / Math.max(1, rect.height)) * rect.height,
       };
-    };
-
-    const setMaskBox = (el: HTMLElement) => {
-      el.style.setProperty('mask-size', '100% 100%');
-      el.style.setProperty('-webkit-mask-size', '100% 100%');
-      el.style.setProperty('mask-repeat', 'no-repeat');
-      el.style.setProperty('-webkit-mask-repeat', 'no-repeat');
-    };
-    const applyMask = (el: HTMLElement, layer: MorphTrailLayer) => {
-      const url = `url(${layer.canvas.toDataURL()})`;
-      el.style.setProperty('mask-image', url);
-      el.style.setProperty('-webkit-mask-image', url);
-    };
-    const clearMask = (el: HTMLElement) => {
-      el.style.removeProperty('mask-image');
-      el.style.removeProperty('-webkit-mask-image');
     };
 
     const frame = () => {
@@ -244,32 +240,44 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
         headRadius > 2 ? { x: head.x, y: head.y, r: headRadius, alpha: 1, seed: HEAD_SEED } : null;
 
       if (hovering || points.length > 0 || headRadius > HEAD_IDLE_R) {
-        frontLayer.redraw(points, liveHead, time);
-        revealLayer.redraw(points, liveHead, time);
-        applyMask(frontEl, frontLayer);
-        applyMask(revealEl, revealLayer);
-        revealEl.style.opacity = '1';
-        // Adaptive resolution: sustained expensive frames drop the bitmap
-        // scale, which quarters the encode cost. Measured as real work time
-        // inside the frame, so display cadence never confuses it.
+        // Stamp every blob once, then reuse the stamp for both layers.
+        blobCtx.clearRect(0, 0, frontLayer.cssW, frontLayer.cssH);
+        for (const p of points) {
+          blobCtx.globalAlpha = p.alpha;
+          drawMorphBlob(blobCtx, p.x, p.y, p.r, time, p.seed);
+        }
+        if (liveHead) {
+          blobCtx.globalAlpha = 1;
+          drawMorphBlob(blobCtx, liveHead.x, liveHead.y, liveHead.r, time, liveHead.seed);
+        }
+        blobCtx.globalAlpha = 1;
+
+        const frontDrawn = frontLayer.draw(frontEl, blob, 'destination-out');
+        revealLayer.draw(revealEl, blob, 'destination-in');
+        // Swap the plain img for the canvas only once the canvas actually
+        // painted, so the lily can never blink away.
+        if (frontDrawn) frontEl.style.visibility = 'hidden';
+
+        // Adaptive resolution: sustained expensive frames step the factor
+        // down, which cheapens the compositing work.
         const work = performance.now() - t0;
         workEma = workEma === 0 ? work : workEma * 0.8 + work * 0.2;
-        if (workEma > 18) slowStreak += 1;
+        if (workEma > 20) slowStreak += 1;
         else slowStreak = Math.max(0, slowStreak - 1);
-        if (slowStreak > 8 && scale > 0.25) {
-          scale /= 2;
+        if (slowStreak > 8 && factor > 0.75) {
+          factor = Math.max(0.75, factor * 0.75);
           workEma = 0;
           slowStreak = 0;
-          syncCanvasSize();
+          resizeAll();
         }
         frames += 1;
-        window.__morphTrailStats = { scale, workEma, frames };
+        window.__morphTrailStats = { factor, workEma, frames };
         raf = requestAnimationFrame(frame);
       } else {
-        // Trail fully died: front is whole again, reveal hidden.
-        revealEl.style.opacity = '0';
-        clearMask(frontEl);
-        clearMask(revealEl);
+        // Trail fully died: whole front bloom again, canvases wiped.
+        frontEl.style.visibility = '';
+        frontLayer.clear();
+        revealLayer.clear();
         running = false;
       }
     };
@@ -284,6 +292,10 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
     const onMove = (e: globalThis.MouseEvent) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
+      // Only a real mousemove activates the trail. Chrome fires a phantom
+      // mouseenter at page load when a stationary pointer already sits over
+      // the hero (hover state recompute on layout settle); treating that as
+      // a hover would run the trail forever with no pointer anywhere near.
       hovering = true;
       kick();
     };
@@ -292,14 +304,11 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
       kick();
     };
 
-    setMaskBox(frontEl);
-    setMaskBox(revealEl);
-    syncCanvasSize();
+    resizeAll();
     stageEl.addEventListener('mousemove', onMove);
-    stageEl.addEventListener('mouseenter', onMove);
     stageEl.addEventListener('mouseleave', onLeave);
     const observer = new ResizeObserver(() => {
-      syncCanvasSize();
+      resizeAll();
       kick();
     });
     observer.observe(flowerEl);
@@ -311,9 +320,9 @@ export function useMorphTrail({ stage, flower, front, reveal }: MorphTrailRefs) 
       observer.disconnect();
       if (running) cancelAnimationFrame(raf);
       running = false;
-      revealEl.style.removeProperty('opacity');
-      clearMask(frontEl);
-      clearMask(revealEl);
+      frontEl.style.visibility = '';
+      frontLayer.clear();
+      revealLayer.clear();
     };
-  }, [stage, flower, front, reveal]);
+  }, [stage, flower, front, reveal, frontCanvas, revealCanvas]);
 }

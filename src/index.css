@@ -31,3 +31,13 @@ body {
 .hero-heading {
   color: #ffffff;
 }
+
+/* Custom cursor: the native cursor is hidden only where the custom one is
+   actually running. The class is added by JavaScript (CustomCursor), so a
+   failed script or a touch device always keeps the native cursor. */
+@media (hover: hover) and (pointer: fine) {
+  html.custom-cursor,
+  html.custom-cursor * {
+    cursor: none !important;
+  }
+}
