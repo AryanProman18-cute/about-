@@ -13,12 +13,17 @@ const HIGHLIGHTS = [
 ];
 
 const DECOR_IMAGES = {
-  moon: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png',
-  p59: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png',
-  lego: 'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png',
+  moon: '/assets/decor/moon.png',
+  p59: '/assets/decor/p59.png',
+  lego: '/assets/decor/lego.png',
   group:
-    'https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png',
+    '/assets/decor/group.png',
 };
+
+// Height-driven sizing keeps all four icons the same visual height at each
+// breakpoint (64px phones up to 150px on big desktops).
+const DECOR_SIZE =
+  'h-[64px] w-auto sm:h-[84px] md:h-[100px] lg:h-[115px] xl:h-[130px] min-[1440px]:h-[150px]';
 
 export default function AboutSection() {
   return (
@@ -26,42 +31,20 @@ export default function AboutSection() {
       id="about"
       className="relative flex min-h-screen flex-col items-center justify-center gap-10 px-5 py-20 sm:gap-14 sm:px-8 md:gap-16 md:px-10"
     >
-      {/* Decorative 3D corner objects */}
-      <FadeIn
-        delay={0.1}
-        x={-80}
-        y={0}
-        duration={0.9}
-        className="hidden lg:block absolute left-[1%] top-[4%] w-[120px] sm:left-[2%] sm:w-[160px] md:left-[4%] md:w-[210px] lg:left-[1%] lg:w-[150px] min-[1440px]:left-[4%] min-[1440px]:w-[210px]"
-      >
-        <img src={DECOR_IMAGES.moon} alt="3D moon icon" className="h-auto w-full" draggable={false} />
+      {/* Decorative 3D corner objects. All four PNGs are pre-cropped to their
+          artwork bounds and sized by height, so the top pair shares one
+          baseline and the bottom pair shares another, at every breakpoint. */}
+      <FadeIn delay={0.1} x={-80} y={0} duration={0.9} className="absolute left-[4%] top-[1.5%] md:top-[4%]">
+        <img src={DECOR_IMAGES.moon} alt="3D moon icon" className={DECOR_SIZE} draggable={false} />
       </FadeIn>
-      <FadeIn
-        delay={0.25}
-        x={-80}
-        y={0}
-        duration={0.9}
-        className="hidden lg:block absolute bottom-[8%] left-[3%] w-[100px] sm:left-[6%] sm:w-[140px] md:left-[10%] md:w-[180px] lg:left-[2%] lg:w-[120px] min-[1440px]:left-[10%] min-[1440px]:w-[180px]"
-      >
-        <img src={DECOR_IMAGES.p59} alt="3D abstract object" className="h-auto w-full" draggable={false} />
+      <FadeIn delay={0.25} x={-80} y={0} duration={0.9} className="absolute bottom-[1.5%] left-[6%] md:bottom-[8%] md:left-[10%]">
+        <img src={DECOR_IMAGES.p59} alt="3D abstract object" className={DECOR_SIZE} draggable={false} />
       </FadeIn>
-      <FadeIn
-        delay={0.15}
-        x={80}
-        y={0}
-        duration={0.9}
-        className="hidden lg:block absolute right-[1%] top-[4%] w-[120px] sm:right-[2%] sm:w-[160px] md:right-[4%] md:w-[210px] lg:right-[1%] lg:w-[150px] min-[1440px]:right-[4%] min-[1440px]:w-[210px]"
-      >
-        <img src={DECOR_IMAGES.lego} alt="3D lego icon" className="h-auto w-full" draggable={false} />
+      <FadeIn delay={0.15} x={80} y={0} duration={0.9} className="absolute right-[4%] top-[1.5%] md:top-[4%]">
+        <img src={DECOR_IMAGES.lego} alt="3D lego icon" className={DECOR_SIZE} draggable={false} />
       </FadeIn>
-      <FadeIn
-        delay={0.3}
-        x={80}
-        y={0}
-        duration={0.9}
-        className="hidden lg:block absolute bottom-[8%] right-[3%] w-[130px] sm:right-[6%] sm:w-[170px] md:right-[10%] md:w-[220px] lg:right-[2%] lg:w-[140px] min-[1440px]:right-[10%] min-[1440px]:w-[220px]"
-      >
-        <img src={DECOR_IMAGES.group} alt="3D shapes group" className="h-auto w-full" draggable={false} />
+      <FadeIn delay={0.3} x={80} y={0} duration={0.9} className="absolute bottom-[1.5%] right-[6%] md:bottom-[8%] md:right-[10%]">
+        <img src={DECOR_IMAGES.group} alt="3D shapes group" className={DECOR_SIZE} draggable={false} />
       </FadeIn>
 
       {/* Heading */}

@@ -130,8 +130,8 @@ export default function ContactSection() {
         </FadeIn>
       </div>
 
-      <footer className="mt-16 flex flex-col items-center justify-between gap-3 border-t border-[#D7E2EA]/10 pt-6 text-center text-xs font-normal uppercase tracking-wider text-[#FFFFFF]/80 sm:mt-20 sm:flex-row sm:text-left sm:text-sm md:pt-8">
-        <span>&copy; 2026 Suyash Vasal Jain</span>
+      <footer className="mt-16 flex flex-col items-center gap-3 border-t border-[#D7E2EA]/10 pt-6 text-center text-xs font-normal uppercase tracking-wider text-[#FFFFFF]/80 sm:mt-20 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4 sm:text-left sm:text-sm md:pt-8">
+        <span className="sm:justify-self-start">&copy; 2026 Suyash Vasal Jain</span>
         <a
           href={RESUME_URL}
           target="_blank"
@@ -142,7 +142,7 @@ export default function ContactSection() {
           <FileText size={14} strokeWidth={1.8} />
           Resume
         </a>
-        <span>Indore, Madhya Pradesh, India</span>
+        <span className="sm:justify-self-end sm:text-right">Indore, Madhya Pradesh, India</span>
       </footer>
     </section>
   );

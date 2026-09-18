@@ -38,6 +38,17 @@ export default function ServicesSection() {
     <section
       id="services"
       className="rounded-t-[40px] bg-[#FFFFFF] px-5 py-20 sm:rounded-t-[50px] sm:px-8 sm:py-24 md:rounded-t-[60px] md:px-10 md:py-32"
+      style={{
+        // Scattered black "starfield" dots: three offset dot grids at
+        // incommensurate spacings, so the pattern never reads as a grid.
+        backgroundImage: [
+          'radial-gradient(circle, rgba(12,12,12,0.32) 1.3px, transparent 1.4px)',
+          'radial-gradient(circle, rgba(12,12,12,0.20) 1.1px, transparent 1.2px)',
+          'radial-gradient(circle, rgba(12,12,12,0.12) 0.9px, transparent 1.0px)',
+        ].join(', '),
+        backgroundSize: '56px 56px, 37px 37px, 23px 23px',
+        backgroundPosition: '3px 7px, 21px 33px, 11px 16px',
+      }}
     >
       <FadeIn
         as="h2"
