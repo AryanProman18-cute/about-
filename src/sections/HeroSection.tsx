@@ -1,5 +1,6 @@
-import { useEffect, useRef, type CSSProperties, type MouseEvent } from 'react';
+import { useRef, type MouseEvent } from 'react';
 import FadeIn from '../components/FadeIn';
+import { useMorphTrail } from '../components/MorphTrail';
 
 const NAV_LINKS = [
   { label: 'About', href: '#about' },
@@ -9,49 +10,20 @@ const NAV_LINKS = [
 ];
 
 export default function HeroSection() {
+  const stageRef = useRef<HTMLElement>(null);
   const lilyWrapRef = useRef<HTMLDivElement>(null);
+  const lilyFrontRef = useRef<HTMLImageElement>(null);
   const lilyRevealRef = useRef<HTMLImageElement>(null);
 
-  // Cursor trail reveal: the warm "reveal" lily is masked to a soft circle
-  // that follows the pointer (eased, so it trails gently). Touch devices
+  // Morphing blob trail: the cursor wipes organic holes through the front
+  // bloom and paints the warm bloom inside the same shapes. Touch devices
   // never fire mousemove, so they simply keep the front bloom.
-  useEffect(() => {
-    const wrap = lilyWrapRef.current;
-    const reveal = lilyRevealRef.current;
-    if (!wrap || !reveal) return;
-
-    let lastX: number | null = null;
-    let lastY: number | null = null;
-    let tx = -1200;
-    let ty = -1200;
-    let cx = -1200;
-    let cy = -1200;
-    let raf: number | null = null;
-
-    const onMove = (e: globalThis.MouseEvent) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
-    };
-    const loop = () => {
-      if (lastX !== null && lastY !== null) {
-        const r = wrap.getBoundingClientRect();
-        tx = lastX - r.left;
-        ty = lastY - r.top;
-      }
-      cx += (tx - cx) * 0.14;
-      cy += (ty - cy) * 0.14;
-      reveal.style.setProperty('--reveal-x', `${cx.toFixed(1)}px`);
-      reveal.style.setProperty('--reveal-y', `${cy.toFixed(1)}px`);
-      raf = requestAnimationFrame(loop);
-    };
-
-    window.addEventListener('mousemove', onMove);
-    raf = requestAnimationFrame(loop);
-    return () => {
-      window.removeEventListener('mousemove', onMove);
-      if (raf !== null) cancelAnimationFrame(raf);
-    };
-  }, []);
+  useMorphTrail({
+    stage: stageRef,
+    flower: lilyWrapRef,
+    front: lilyFrontRef,
+    reveal: lilyRevealRef,
+  });
 
   // Programmatic smooth scroll, works everywhere, including sandboxed
   // preview iframes where default hash navigation can be blocked.
@@ -61,7 +33,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative flex h-screen flex-col overflow-clip">
+    <section ref={stageRef} className="relative flex h-screen flex-col overflow-clip">
       {/* Themed hero backdrop, pixel-art field, edge to edge */}
       <img
         src="/assets/hero-bg4.png"
@@ -85,6 +57,7 @@ export default function HeroSection() {
         <FadeIn delay={0.6} y={30}>
           <div ref={lilyWrapRef} className="relative h-auto w-full lg:h-[104.88vh] lg:w-auto">
             <img
+              ref={lilyFrontRef}
               src="/assets/lily-front.png"
               alt="Pixel-art pink and violet lily"
               draggable={false}
@@ -96,16 +69,7 @@ export default function HeroSection() {
               alt=""
               draggable={false}
               className="absolute inset-0 h-full w-full select-none object-cover"
-              style={
-                {
-                  '--reveal-x': '-1200px',
-                  '--reveal-y': '-1200px',
-                  WebkitMaskImage:
-                    'radial-gradient(circle 300px at var(--reveal-x) var(--reveal-y), #000 0%, #000 30%, transparent 72%)',
-                  maskImage:
-                    'radial-gradient(circle 300px at var(--reveal-x) var(--reveal-y), #000 0%, #000 30%, transparent 72%)',
-                } as CSSProperties
-              }
+              style={{ opacity: 0 }}
             />
           </div>
         </FadeIn>
