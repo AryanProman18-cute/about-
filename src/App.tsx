@@ -1,5 +1,4 @@
 import { ToastProvider } from './components/Toast';
-import CustomCursor from './components/CustomCursor';
 import HeroSection from './sections/HeroSection';
 import MarqueeSection from './sections/MarqueeSection';
 import AboutSection from './sections/AboutSection';
@@ -32,7 +31,6 @@ export default function App() {
           <ContactSection />
         </div>
       </main>
-      <CustomCursor />
     </ToastProvider>
   );
 }

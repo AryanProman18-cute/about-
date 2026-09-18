@@ -20,8 +20,8 @@ import { useEffect, type RefObject } from 'react';
  */
 
 export const TRAIL_MAX_POINTS = 60;
-export const TRAIL_HEAD_R = 140;
-export const TRAIL_NOISE_AMP = 44;
+export const TRAIL_HEAD_R = 98;
+export const TRAIL_NOISE_AMP = 31;
 export const TRAIL_BLOB_PTS = 24;
 export const TRAIL_FADE_SPEED = 0.92;
 export const TRAIL_SAMPLE_DIST = 8;
@@ -175,7 +175,7 @@ export function useMorphTrail({ stage, flower, front, reveal, frontCanvas, revea
     let running = false;
     // Canvas resolution factor: the device pixel ratio, capped, and stepped
     // down if the per frame compositing work ever runs long.
-    let factor = Math.min(window.devicePixelRatio || 1, 2);
+    let factor = Math.min(window.devicePixelRatio || 1, 1.5);
     let workEma = 0;
     let slowStreak = 0;
     let frames = 0;
@@ -262,9 +262,9 @@ export function useMorphTrail({ stage, flower, front, reveal, frontCanvas, revea
         // down, which cheapens the compositing work.
         const work = performance.now() - t0;
         workEma = workEma === 0 ? work : workEma * 0.8 + work * 0.2;
-        if (workEma > 20) slowStreak += 1;
+        if (workEma > 16) slowStreak += 1;
         else slowStreak = Math.max(0, slowStreak - 1);
-        if (slowStreak > 8 && factor > 0.75) {
+        if (slowStreak > 5 && factor > 0.75) {
           factor = Math.max(0.75, factor * 0.75);
           workEma = 0;
           slowStreak = 0;
